@@ -1,0 +1,654 @@
+import React, { useState, useEffect } from 'react';
+import { Play, CheckCircle, XCircle, Map, Clock, Trophy, MapPin, ArrowRight, RotateCcw } from 'lucide-react';
+
+// --- DATA CÂU HỎI MỚI (BAO PHỦ TOÀN BỘ BÀI HỌC VÀ LỒNG GHÉP CÂU PHÂN BIỆT MÊ TÍN) ---
+const GAME_DATA = [
+  {
+    id: 1,
+    name: "Nhóm 1: Tín ngưỡng Dân gian",
+    bgGradient: "from-amber-400 to-orange-600",
+    cardColor: "bg-amber-600",
+    icon: "🕯️",
+    image: "https://images.unsplash.com/photo-1600172454132-1ce82b6b063d?auto=format&fit=crop&w=1200&q=80",
+    questions: [
+      {
+        q: "Sự khác biệt cơ bản nhất giữa 'tín ngưỡng' và 'mê tín dị đoan' là gì?",
+        options: [
+          "Tín ngưỡng hướng thiện, mang giá trị văn hóa; mê tín là niềm tin mù quáng, gây hại.",
+          "Cả hai đều là những hủ tục cần được loại bỏ khỏi đời sống văn hóa.",
+          "Tín ngưỡng chỉ có ở nông thôn, mê tín dị đoan chỉ có ở thành thị.",
+          "Tín ngưỡng gây tốn kém tiền bạc nhiều hơn mê tín dị đoan."
+        ],
+        correct: 0
+      },
+      {
+        q: "Tục thờ cúng tổ tiên của người dân Nghệ An chủ yếu thể hiện đạo lí truyền thống nào?",
+        options: ["Tôn sư trọng đạo.", "Uống nước nhớ nguồn.", "Lá lành đùm lá rách.", "Thương người như thể thương thân."],
+        correct: 1
+      },
+      {
+        q: "Trong tín ngưỡng làng xã, Thần Thành Hoàng thường là những nhân vật nào?",
+        options: [
+          "Những vị thần tiên trên trời.",
+          "Những người giàu có nhất vùng.",
+          "Người có công lập làng, bảo vệ dân, truyền nghề.",
+          "Chỉ là các vị vua chúa thời xưa."
+        ],
+        correct: 2
+      },
+      {
+        q: "Thời xưa, công trình kiến trúc nào thường là không gian sinh hoạt tín ngưỡng chung của cả một làng quê?",
+        options: ["Nhà thờ họ.", "Đình làng.", "Chùa chiền.", "Nhà văn hóa."],
+        correct: 1
+      },
+      {
+        q: "Việc người dân Nghệ An lập đền thờ Vua Mai Hắc Đế, Nguyễn Biểu mang ý nghĩa gì?",
+        options: [
+          "Cầu mong một năm mưa thuận gió hòa.",
+          "Suy tôn và tri ân những anh hùng có công với đất nước.",
+          "Biểu hiện của tín ngưỡng phồn thực.",
+          "Giải trí trong các dịp lễ hội mùa xuân."
+        ],
+        correct: 1
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: "Nhóm 2: Tín ngưỡng Thờ Mẫu",
+    bgGradient: "from-pink-500 to-rose-700",
+    cardColor: "bg-rose-600",
+    icon: "🌊",
+    image: "https://images.unsplash.com/photo-1599708153386-62bf3f034eb8?auto=format&fit=crop&w=1200&q=80",
+    questions: [
+      {
+        q: "Tín ngưỡng thờ Mẫu ở Nghệ An có đặc trưng nổi bật nào so với các vùng miền khác?",
+        options: [
+          "Chỉ thực hiện trong không gian cung đình.",
+          "Chủ yếu là tín ngưỡng thờ Nữ thần gắn liền với vùng sông nước biển cả.",
+          "Không tổ chức các lễ hội rước kiệu.",
+          "Chỉ thờ duy nhất một vị Mẫu Thượng Ngàn."
+        ],
+        correct: 1
+      },
+      {
+        q: "Đền Cờn (thị xã Hoàng Mai) nổi tiếng linh thiêng là nơi thờ nhân vật nào?",
+        options: ["Bà Chúa Kho.", "Thánh Gióng.", "Tứ vị Thánh Nương.", "Mẫu Liễu Hạnh."],
+        correct: 2
+      },
+      {
+        q: "Trong tâm thức người dân ven biển Nghệ An, 'Bà Giàng Lạch' là tên gọi dân gian của vị thần nào?",
+        options: ["Thần Mặt trời.", "Thần Núi (Sơn Thần).", "Thần Nông nghiệp.", "Thần Sông Biển (Thủy Thần)."],
+        correct: 3
+      },
+      {
+        q: "Mục đích lớn nhất của ngư dân khi tham gia các lễ hội đền, phủ ở vùng biển là gì?",
+        options: [
+          "Cầu mong sóng yên biển lặng, tôm cá đầy khoang.",
+          "Thi tài đua thuyền để nhận thưởng lớn.",
+          "Giao lưu buôn bán hàng hóa hải sản.",
+          "Chỉ để vui chơi giải trí sau ngày làm việc."
+        ],
+        correct: 0
+      },
+      {
+        q: "Tín ngưỡng Phồn thực ở Nghệ An được thể hiện qua ước muốn nào của người xưa?",
+        options: [
+          "Mong chiến thắng giặc ngoại xâm.",
+          "Mong mùa màng bội thu, con người sinh sôi nảy nở.",
+          "Cầu xin thăng quan tiến chức.",
+          "Cầu mong buôn may bán đắt."
+        ],
+        correct: 1
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "Nhóm 3: Di sản Phật giáo",
+    bgGradient: "from-yellow-400 to-orange-500",
+    cardColor: "bg-orange-500",
+    icon: "🪷",
+    image: "https://images.unsplash.com/photo-1545562083-a600704fa486?auto=format&fit=crop&w=1200&q=80",
+    questions: [
+      {
+        q: "Các ngôi chùa Phật giáo ở Nghệ An có đặc điểm phân bố chủ yếu ở khu vực nào?",
+        options: [
+          "Tập trung ở các huyện miền núi cao.",
+          "Phân bố dày đặc ở vùng đồng bằng ven sông và ven biển.",
+          "Chỉ xuất hiện ở trung tâm thành phố Vinh.",
+          "Nằm sâu trong các khu rừng cấm."
+        ],
+        correct: 1
+      },
+      {
+        q: "Lối kiến trúc và cách bày trí tượng Phật 'Tiền Phật, hậu Thần' trong các chùa cổ ở Nghệ An thể hiện điều gì?",
+        options: [
+          "Sự dung hợp hài hòa giữa Phật giáo và tín ngưỡng bản địa.",
+          "Phật giáo hoàn toàn lấn át tín ngưỡng dân gian.",
+          "Quy định bắt buộc của triều đình phong kiến.",
+          "Sự thiếu thốn kinh phí xây dựng đền đài riêng."
+        ],
+        correct: 0
+      },
+      {
+        q: "Ngôi chùa nào tọa lạc trên đỉnh núi ở Nam Đàn, cảnh quan hùng vĩ và là trung tâm Phật giáo lớn của tỉnh?",
+        options: ["Chùa Hương Tích.", "Chùa Cổ Am.", "Chùa Đại Tuệ.", "Chùa Bái Đính."],
+        correct: 2
+      },
+      {
+        q: "Ngôi chùa cổ nổi tiếng linh thiêng ở thành phố Vinh, còn có tên gọi dân dã là 'Chùa Sư Nữ' là chùa nào?",
+        options: ["Chùa Cần Linh.", "Chùa Chí Linh.", "Chùa Diệc.", "Chùa Đảo Ngư."],
+        correct: 0
+      },
+      {
+        q: "Giá trị đạo đức cốt lõi mà Phật giáo đã thấm nhuần vào đời sống người dân xứ Nghệ là gì?",
+        options: [
+          "Thượng võ, sẵn sàng hi sinh vì nước.",
+          "Lối sống từ bi, hỷ xả, làm lành lánh dữ.",
+          "Đề cao sức mạnh vật chất, làm giàu.",
+          "Sống xa lánh xã hội, ẩn tu."
+        ],
+        correct: 1
+      }
+    ]
+  },
+  {
+    id: 4,
+    name: "Nhóm 4: Văn hóa Công giáo",
+    bgGradient: "from-blue-500 to-indigo-700",
+    cardColor: "bg-blue-600",
+    icon: "⛪",
+    image: "https://images.unsplash.com/photo-1548625361-ecbfbd2d7a22?auto=format&fit=crop&w=1200&q=80",
+    questions: [
+      {
+        q: "Công giáo (Đạo Thiên Chúa) bắt đầu được truyền vào vùng đất Nghệ An từ khoảng thời gian nào?",
+        options: ["Thế kỉ X.", "Thế kỉ XVI - XVII.", "Thế kỉ XIX.", "Đầu thế kỉ XX."],
+        correct: 1
+      },
+      {
+        q: "Trung tâm quyền lực và sinh hoạt tôn giáo lớn nhất của Công giáo Nghệ An nằm ở địa phương nào?",
+        options: ["Giáo phận Vinh (Xã Đoài, Nghi Lộc).", "Cửa Lò.", "Giáo xứ Cẩm Sơn (Đô Lương).", "Diễn Châu."],
+        correct: 0
+      },
+      {
+        q: "Các ngôi nhà thờ cổ kính tại Nghệ An (như nhà thờ Chính tòa Xã Đoài) thường mang phong cách kiến trúc gì?",
+        options: [
+          "Kiến trúc đình làng Việt mái cong.",
+          "Kiến trúc đền đài Ấn Độ giáo.",
+          "Kiến trúc Gothic phương Tây kết hợp bản địa.",
+          "Kiến trúc hiện đại khối hộp."
+        ],
+        correct: 2
+      },
+      {
+        q: "Ngoài việc tham gia các nghi lễ tôn giáo, đồng bào Công giáo Nghệ An thường tích cực tham gia vào lĩnh vực nào của xã hội?",
+        options: [
+          "Chỉ tổ chức các lễ hội nội bộ.",
+          "Hoạt động từ thiện, bác ái, giáo dục và y tế.",
+          "Lập các hội nhóm quân sự.",
+          "Sống cô lập, không giao lưu với người ngoại đạo."
+        ],
+        correct: 1
+      },
+      {
+        q: "Châm ngôn sống nào dưới đây phản ánh rõ nhất tinh thần yêu nước và đạo đức của người Công giáo Việt Nam?",
+        options: [
+          "Trung quân ái quốc.",
+          "Tốt đời đẹp đạo, Kính Chúa yêu người.",
+          "Sống ẩn mình chờ thời.",
+          "Tứ hải giai huynh đệ."
+        ],
+        correct: 1
+      }
+    ]
+  }
+];
+
+export default function App() {
+  const [gameState, setGameState] = useState('intro');
+  const [teamScores, setTeamScores] = useState({ 1: null, 2: null, 3: null, 4: null });
+  const [currentTeam, setCurrentTeam] = useState(null);
+  
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(180);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    if (gameState === 'playing' && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && gameState === 'playing') {
+      handleFinishQuiz();
+    }
+    return () => clearInterval(timer);
+  }, [gameState, timeLeft]);
+
+  const startGame = () => setGameState('map');
+
+  const startTeamQuiz = (teamId) => {
+    setCurrentTeam(GAME_DATA.find(t => t.id === teamId));
+    setCurrentQIndex(0);
+    setScore(0);
+    setTimeLeft(180);
+    setSelectedAnswer(null);
+    setIsAnswered(false);
+    setGameState('playing');
+  };
+
+  const handleAnswer = (optionIndex) => {
+    if (isAnswered) return;
+    
+    setSelectedAnswer(optionIndex);
+    setIsAnswered(true);
+    
+    const isCorrect = optionIndex === currentTeam.questions[currentQIndex].correct;
+    if (isCorrect) setScore(prev => prev + 2);
+
+    setTimeout(() => {
+      if (currentQIndex < currentTeam.questions.length - 1) {
+        setCurrentQIndex(prev => prev + 1);
+        setSelectedAnswer(null);
+        setIsAnswered(false);
+      } else {
+        handleFinishQuiz(isCorrect ? score + 2 : score);
+      }
+    }, 1800); // Tăng thời gian chờ lên một chút để học sinh nhìn rõ đáp án
+  };
+
+  const handleFinishQuiz = (finalScore = score) => {
+    setTeamScores(prev => {
+      const currentBest = prev[currentTeam.id];
+      const newAttempt = { score: finalScore, timeLeft: timeLeft };
+      
+      // Nếu chưa chơi lần nào, lưu luôn kết quả
+      if (!currentBest) return { ...prev, [currentTeam.id]: newAttempt };
+      
+      // Nếu đã chơi: Giữ lại điểm cao hơn, hoặc bằng điểm nhưng hoàn thành nhanh hơn
+      if (newAttempt.score > currentBest.score || 
+         (newAttempt.score === currentBest.score && newAttempt.timeLeft > currentBest.timeLeft)) {
+        return { ...prev, [currentTeam.id]: newAttempt };
+      }
+      return prev;
+    });
+    setGameState('result');
+  };
+
+  const backToMap = () => {
+    // Đã thay đổi: Khi quay lại bản đồ, nếu tất cả đã chơi, sẽ vẫn về màn hình map để giáo viên chủ động bấm nút "Xem kết quả".
+    setGameState('map');
+  };
+
+  const resetGame = () => {
+    setTeamScores({ 1: null, 2: null, 3: null, 4: null });
+    setGameState('intro');
+  };
+
+  const getFeedback = (pts) => {
+    if (pts === 10) return { text: "XUẤT SẮC!", desc: "Nhà nghiên cứu bậc thầy!", color: "text-green-500" };
+    if (pts === 9) return { text: "TỐT (NHANH NHẤT)!", desc: "8đ + 1đ bonus tốc độ!", color: "text-emerald-500" };
+    if (pts === 8) return { text: "TỐT!", desc: "Am hiểu sâu sắc văn hóa!", color: "text-blue-500" };
+    if (pts === 7) return { text: "ĐẠT (NHANH HƠN)!", desc: "6đ + 1đ bonus tốc độ!", color: "text-teal-500" };
+    if (pts === 6) return { text: "ĐẠT!", desc: "Nắm vững kiến thức nền!", color: "text-amber-500" };
+    if (pts === 5) return { text: "CỐ GẮNG (+1đ)!", desc: "4đ + 1đ bonus tốc độ!", color: "text-orange-500" };
+    if (pts === 4) return { text: "CỐ GẮNG!", desc: "Hãy tìm hiểu thêm nhé!", color: "text-orange-600" };
+    if (pts === 3) return { text: "CẦN ÔN LẠI (+1đ)!", desc: "2đ + 1đ bonus tốc độ!", color: "text-red-400" };
+    if (pts === 2) return { text: "CẦN ÔN LẠI!", desc: "Hãy đọc kĩ lại bài học nhé!", color: "text-red-500" };
+    if (pts === 1) return { text: "CHƯA ĐẠT (+1đ)!", desc: "0đ + 1đ bonus tốc độ!", color: "text-red-600" };
+    return { text: "CHƯA ĐẠT!", desc: "Bạn chưa trả lời đúng câu nào!", color: "text-red-600" };
+  };
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  // --- 1. MÀN HÌNH CHÍNH (TO & RÕ) ---
+  if (gameState === 'intro') {
+    return (
+      <div className="min-h-screen bg-[url('https://images.unsplash.com/photo-1596710609384-e91b268df141?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center flex items-center justify-center p-4 md:p-8">
+        <div className="absolute inset-0 bg-black/75 backdrop-blur-md"></div>
+        <div className="relative bg-white rounded-[3rem] shadow-2xl max-w-5xl w-full p-10 md:p-16 text-center border-8 border-amber-500">
+          <div className="w-32 h-32 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+            <Map className="w-20 h-20 text-amber-600" />
+          </div>
+          <h1 className="text-6xl md:text-8xl font-black text-amber-700 mb-6 tracking-tighter drop-shadow-sm">
+            MẬT MÃ DI SẢN
+          </h1>
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-700 mb-12 uppercase tracking-widest">
+            Hành trình Xứ Nghệ
+          </h2>
+          
+          <div className="bg-slate-50 rounded-3xl p-8 mb-12 text-left border-2 border-slate-200 inline-block">
+            <h3 className="font-bold text-3xl mb-6 flex items-center text-slate-800">
+              <Clock className="w-8 h-8 mr-4 text-amber-600" /> THỂ LỆ TRÒ CHƠI:
+            </h3>
+            <ul className="space-y-4 text-2xl text-slate-700 font-medium">
+              <li className="flex items-center"><MapPin className="w-8 h-8 mr-3 text-red-500"/> Lớp chia thành <strong>&nbsp;4 nhóm&nbsp;</strong> thám hiểm.</li>
+              <li className="flex items-center"><Clock className="w-8 h-8 mr-3 text-blue-500"/> Mỗi nhóm có tối đa <strong>&nbsp;3 phút&nbsp;</strong> giải mã 5 câu.</li>
+              <li className="flex items-center"><Trophy className="w-8 h-8 mr-3 text-yellow-500"/> Mỗi câu đúng được <strong>&nbsp;2 điểm&nbsp;</strong> (Tối đa 10đ).</li>
+            </ul>
+          </div>
+          <br />
+          <button 
+            onClick={startGame}
+            className="group inline-flex items-center justify-center px-16 py-6 text-3xl font-black text-white transition-all duration-300 bg-gradient-to-r from-amber-500 to-red-600 rounded-full hover:scale-105 shadow-[0_10px_40px_-10px_rgba(217,119,6,0.8)]"
+          >
+            BẮT ĐẦU KHÁM PHÁ
+            <ArrowRight className="w-10 h-10 ml-4 group-hover:translate-x-2 transition-transform" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- 2. BẢN ĐỒ CHỌN NHÓM (TO & ĐẸP) ---
+  if (gameState === 'map') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 flex flex-col justify-center">
+        <div className="w-full max-w-[95vw] mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl md:text-7xl font-black text-white uppercase mb-4 tracking-tight drop-shadow-lg">
+              BẢN ĐỒ DI SẢN
+            </h2>
+            <p className="text-2xl md:text-3xl text-amber-400 font-bold">Vui lòng chọn trạm của nhóm bạn</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            {GAME_DATA.map((team) => {
+              const attempt = teamScores[team.id];
+              const isPlayed = attempt !== null;
+              
+              return (
+                <div 
+                  key={team.id}
+                  onClick={() => startTeamQuiz(team.id)}
+                  className={`relative rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-300 border-4 border-transparent hover:border-white/50 hover:-translate-y-3 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] cursor-pointer group`}
+                >
+                  <div className="h-64 md:h-80 overflow-hidden relative">
+                    <img src={team.image} alt={team.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                    <div className={`absolute inset-0 bg-gradient-to-t ${team.bgGradient} opacity-80 mix-blend-multiply`}></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                    
+                    <div className="absolute inset-0 p-8 flex flex-col justify-between">
+                      <div className="flex justify-end">
+                        {isPlayed && (
+                          <div className="bg-black/50 backdrop-blur-md px-6 py-3 rounded-2xl text-white font-black text-3xl flex items-center border-2 border-white/20 shadow-xl">
+                            <Trophy className="w-8 h-8 mr-3 text-yellow-400" /> Kỷ lục: {attempt.score}đ
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <span className="text-7xl drop-shadow-2xl mb-4 block group-hover:scale-110 transition-transform">{team.icon}</span>
+                        <h3 className="text-white font-black text-4xl md:text-5xl drop-shadow-lg leading-tight">
+                          {team.name}
+                        </h3>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {!isPlayed ? (
+                    <div className={`${team.cardColor} p-6 text-white font-bold text-2xl flex justify-between items-center uppercase tracking-wider`}>
+                      <span>Bấm để bắt đầu</span>
+                      <Play className="w-8 h-8" />
+                    </div>
+                  ) : (
+                    <div className="bg-slate-800 p-6 text-slate-400 font-bold text-2xl flex justify-between items-center uppercase tracking-wider border-t border-slate-700 hover:bg-slate-700 hover:text-white transition-colors">
+                      <span>Đã chơi - Chơi lại?</span>
+                      <RotateCcw className="w-8 h-8 text-amber-500" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          
+          {Object.values(teamScores).some(s => s !== null) && (
+            <div className="mt-16 text-center animate-bounce">
+              <button 
+                onClick={() => setGameState('final')}
+                className="bg-gradient-to-r from-green-500 to-emerald-700 text-white px-16 py-6 rounded-full font-black text-4xl shadow-[0_10px_30px_rgba(16,185,129,0.5)] hover:scale-105 transition-transform"
+              >
+                XEM KẾT QUẢ CHUNG CUỘC
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // --- 3. MÀN HÌNH CÂU HỎI (TRÀN VIỀN, CHỮ CỰC TO) ---
+  if (gameState === 'playing' && currentTeam) {
+    const question = currentTeam.questions[currentQIndex];
+    const progress = ((currentQIndex) / currentTeam.questions.length) * 100;
+
+    return (
+      <div className={`min-h-screen bg-gradient-to-br ${currentTeam.bgGradient} p-4 md:p-8 flex flex-col justify-between`}>
+        
+        {/* Header Tràn Viền */}
+        <div className="w-full mx-auto flex flex-wrap justify-between items-center mb-6 bg-white/10 backdrop-blur-md p-4 md:p-6 rounded-[2rem] shadow-lg border border-white/20">
+          <div className="flex items-center gap-4 text-white">
+            <span className="text-5xl md:text-6xl bg-white/20 p-3 rounded-2xl">{currentTeam.icon}</span>
+            <div>
+              <h2 className="font-black text-2xl md:text-4xl lg:text-5xl drop-shadow-md">{currentTeam.name}</h2>
+              <div className="text-xl md:text-2xl font-bold opacity-80 mt-1 uppercase tracking-wider">CÂU {currentQIndex + 1} / 5</div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4 md:gap-8 mt-4 md:mt-0">
+            <div className="bg-black/30 backdrop-blur-sm text-white px-6 py-3 rounded-2xl font-black text-2xl md:text-4xl flex items-center border border-white/10 shadow-inner">
+              <Trophy className="w-8 h-8 md:w-10 md:h-10 mr-3 text-yellow-400" /> {score} Điểm
+            </div>
+            <div className={`px-6 py-3 rounded-2xl font-black text-2xl md:text-4xl flex items-center shadow-inner ${timeLeft < 30 ? 'bg-red-600 text-white animate-pulse' : 'bg-white text-slate-800'}`}>
+              <Clock className="w-8 h-8 md:w-10 md:h-10 mr-3" /> {formatTime(timeLeft)}
+            </div>
+          </div>
+        </div>
+
+        {/* Thanh Tiến Trình */}
+        <div className="w-full bg-black/20 rounded-full h-4 mb-8 overflow-hidden shadow-inner border border-white/10">
+          <div className="h-full bg-white transition-all duration-500 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)]" style={{ width: `${progress}%` }}></div>
+        </div>
+
+        {/* Khu vực Câu hỏi (Nền trắng làm nổi bật chữ) */}
+        <div className="flex-grow flex flex-col justify-center">
+          <div className="w-full bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 lg:p-16 mb-4 flex flex-col justify-between" style={{ minHeight: '65vh' }}>
+            
+            {/* Câu Hỏi */}
+            <h3 className="text-4xl md:text-5xl lg:text-6xl xl:text-[4.5rem] font-black text-slate-800 leading-[1.3] mb-12 text-center drop-shadow-sm">
+              {question.q}
+            </h3>
+            
+            {/* Các Lựa Chọn */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 flex-grow">
+              {question.options.map((opt, idx) => {
+                let btnStyle = "bg-slate-50 border-4 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300";
+                let icon = null;
+
+                if (isAnswered) {
+                  if (idx === question.correct) {
+                    btnStyle = "bg-green-100 border-4 border-green-500 text-green-800 scale-[1.02] shadow-2xl z-10";
+                    icon = <CheckCircle className="w-12 h-12 text-green-600" />;
+                  } else if (idx === selectedAnswer && idx !== question.correct) {
+                    btnStyle = "bg-red-50 border-4 border-red-400 text-red-600 opacity-90";
+                    icon = <XCircle className="w-12 h-12 text-red-500" />;
+                  } else {
+                    btnStyle = "bg-slate-50 border-4 border-slate-200 text-slate-400 opacity-40";
+                  }
+                }
+
+                const labels = ["A", "B", "C", "D"];
+
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleAnswer(idx)}
+                    disabled={isAnswered}
+                    className={`relative p-6 md:p-8 rounded-[2rem] font-bold text-2xl md:text-3xl lg:text-4xl text-left transition-all duration-300 flex items-center ${btnStyle} leading-tight`}
+                  >
+                    <div className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full mr-6 text-3xl md:text-4xl text-white ${isAnswered && idx === question.correct ? 'bg-green-500' : 'bg-slate-800'}`}>
+                      {labels[idx]}
+                    </div>
+                    <span className="pr-16 flex-grow">{opt}</span>
+                    {icon && <span className="absolute right-8">{icon}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- 4. MÀN HÌNH ĐIỂM SỐ NHÓM (HIỆU ỨNG LỚN) ---
+  if (gameState === 'result' && currentTeam) {
+    const attempt = teamScores[currentTeam.id];
+    const finalScore = attempt ? attempt.score : 0;
+    const feedback = getFeedback(finalScore);
+
+    return (
+      <div className={`min-h-screen bg-gradient-to-br ${currentTeam.bgGradient} flex items-center justify-center p-4`}>
+        <div className="bg-white rounded-[4rem] shadow-[0_30px_60px_rgba(0,0,0,0.5)] max-w-4xl w-full p-12 md:p-20 text-center relative overflow-hidden">
+          
+          <div className="text-[8rem] mb-6 drop-shadow-xl animate-bounce">{currentTeam.icon}</div>
+          <h2 className="text-4xl md:text-6xl font-black text-slate-800 mb-4 uppercase">{currentTeam.name}</h2>
+          <p className="text-2xl md:text-3xl text-slate-500 mb-12 font-bold">Đã hoàn thành thử thách!</p>
+          
+          <div className="mb-12">
+            <div className="text-3xl font-black text-slate-300 uppercase tracking-[0.5em] mb-4">TỔNG ĐIỂM</div>
+            <div className={`text-[10rem] md:text-[14rem] font-black leading-none drop-shadow-2xl ${feedback.color} flex justify-center items-baseline`}>
+              {finalScore}<span className="text-6xl md:text-8xl text-slate-300 ml-4">/10</span>
+            </div>
+          </div>
+
+          <div className="mb-16">
+            <h3 className={`font-black text-5xl md:text-6xl mb-4 uppercase ${feedback.color}`}>{feedback.text}</h3>
+            <p className="text-3xl text-slate-600 font-medium">{feedback.desc}</p>
+          </div>
+
+          <button 
+            onClick={backToMap}
+            className="w-full py-8 rounded-[2rem] text-white font-black text-4xl shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all hover:-translate-y-2 bg-slate-800 hover:bg-slate-900"
+          >
+            TRỞ VỀ BẢN ĐỒ
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- 5. MÀN HÌNH TỔNG KẾT (BẢNG VÀNG) ---
+  if (gameState === 'final') {
+    // Tính tổng số nhóm có điểm
+    const playedTeamsCount = Object.values(teamScores).filter(s => s !== null).length;
+
+    // --- LOGIC TÍNH ĐIỂM THƯỞNG CHO MỌI MỨC ĐIỂM ---
+    const processedScores = {};
+    const scoreGroups = {};
+    
+    // Phân nhóm các đội theo điểm số gốc
+    Object.keys(teamScores).forEach(teamId => {
+      const attempt = teamScores[teamId];
+      if (attempt) {
+        const s = attempt.score;
+        if (!scoreGroups[s]) scoreGroups[s] = [];
+        scoreGroups[s].push({ teamId, timeLeft: attempt.timeLeft });
+      }
+    });
+
+    // Xét thưởng cho các nhóm bằng điểm nhau
+    Object.keys(teamScores).forEach(teamId => {
+      const attempt = teamScores[teamId];
+      if (!attempt) return;
+      
+      let finalS = attempt.score;
+      let isBonus = false;
+      let bonusText = "";
+
+      // Nếu điểm này < 10 và có từ 2 đội trở lên cùng đạt mức điểm này
+      if (attempt.score < 10 && scoreGroups[attempt.score] && scoreGroups[attempt.score].length >= 2) {
+        // Tìm thời gian còn lại nhiều nhất (nhanh nhất) trong nhóm điểm này
+        const maxTimeForThisScore = Math.max(...scoreGroups[attempt.score].map(t => t.timeLeft));
+        
+        // Nếu đội này là đội nhanh nhất trong nhóm bằng điểm
+        if (attempt.timeLeft === maxTimeForThisScore) {
+          finalS += 1;
+          isBonus = true;
+          bonusText = attempt.score === 8 ? "Nhóm Nhanh Nhất (+1đ)" : "Nhanh Hơn (+1đ)";
+        }
+      }
+      
+      processedScores[teamId] = {
+        displayScore: finalS,
+        isBonus,
+        bonusText
+      };
+    });
+
+    return (
+      <div className="min-h-screen bg-slate-900 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] p-4 md:p-8 flex items-center justify-center">
+        <div className="max-w-6xl w-full bg-white/95 backdrop-blur-xl rounded-[4rem] shadow-[0_0_100px_rgba(255,255,255,0.1)] p-10 md:p-16 border-8 border-yellow-500/30">
+          
+          <div className="text-center mb-16 relative">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-yellow-400 blur-[100px] opacity-20 rounded-full"></div>
+            <Trophy className="w-32 h-32 text-yellow-500 mx-auto mb-6 drop-shadow-2xl" />
+            <h1 className="text-6xl md:text-8xl font-black text-slate-800 uppercase tracking-tighter drop-shadow-sm">
+              BẢNG VÀNG DI SẢN
+            </h1>
+            <p className="text-3xl text-slate-500 mt-4 font-bold uppercase tracking-widest">Tổng Kết Lớp Học ({playedTeamsCount}/4 Nhóm)</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 mb-16">
+            {GAME_DATA.map((team, index) => {
+              const attempt = teamScores[team.id];
+              // Nếu nhóm chưa chơi, hiện thông báo chưa chơi thay vì lỗi
+              if (attempt === null) return null; 
+
+              // Lấy kết quả đã qua xử lý thưởng
+              const { displayScore, isBonus, bonusText } = processedScores[team.id];
+              const fb = getFeedback(displayScore);
+              
+              return (
+                <div key={team.id} className={`flex items-center justify-between p-6 md:p-8 rounded-[2.5rem] bg-slate-50 border-4 ${isBonus ? 'border-emerald-400 bg-emerald-50/50' : 'border-slate-200'} hover:border-slate-300 transition-colors shadow-sm relative overflow-hidden`}>
+                  {isBonus && <div className="absolute top-0 right-0 bg-emerald-500 text-white text-lg font-bold px-6 py-2 rounded-bl-2xl z-10 shadow-md">{bonusText}</div>}
+                  <div className="flex items-center z-10 relative">
+                    <div className={`w-24 h-24 md:w-32 md:h-32 rounded-[2rem] flex items-center justify-center text-5xl md:text-7xl mr-6 md:mr-8 shadow-inner bg-gradient-to-br ${team.bgGradient}`}>
+                      {team.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-black text-3xl md:text-5xl text-slate-800 mb-2 uppercase">{team.name.split(':')[0]}</h3>
+                      <p className={`text-xl md:text-2xl font-bold ${fb.color}`}>{fb.text}</p>
+                    </div>
+                  </div>
+                  
+                  <div className={`z-10 relative text-[4rem] md:text-[6rem] font-black ${isBonus ? 'text-emerald-600' : 'text-slate-800'} bg-white px-8 md:px-12 py-4 rounded-[2rem] shadow-inner border-2 border-slate-100 flex items-baseline`}>
+                    {displayScore}<span className="text-3xl md:text-4xl text-slate-400 ml-2">đ</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="text-center">
+            <button 
+              onClick={resetGame}
+              className="inline-flex items-center px-12 py-6 bg-slate-800 text-white font-black text-3xl rounded-full hover:bg-black transition-colors hover:scale-105 shadow-xl"
+            >
+              <RotateCcw className="w-10 h-10 mr-4" /> CHƠI LẠI TỪ ĐẦU
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
